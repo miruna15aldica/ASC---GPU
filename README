@@ -1,0 +1,40 @@
+# README
+## MARIA-MIRUNA ALDICA
+
+Tema caută un nonce care satisface o anumită dificultate.
+
+În *findNonce*, scopul meu a fost să caut un nonce valid.
+Prima data, verific dacă nonce-ul a fost deja găsit. Dacă da,
+nu se mai întâmplă nimic. Pentru fiecare apelare a funcției
+generez un id unic, bazat pe identificatorii blocului și threadului.
+Copiem conținutul blocului într-o variabilă locală și adaugăm nonce-ul 
+la sfârșitul acesteia. După aceea, calculez hash-ul blocului 
+actualizat și verific dacă acesta îndeplinește condițiile de 
+dificultate. Dacă da, printr-o operație atomică actualizez nonce-ul găsit.
+*Implementarea din această funcție se bazează ff. mult pe implementarea
+din cpu_miner.c, Test 5.*
+
+*MallocCuda* și *FreeCuda* sunt funcții folosite pentru alocarea și
+eliberarea memoriei pentru variabilele necesare algoritmului.
+Am ales să folosesc această scriere pentru o organizare mai
+bună și eficientizare a modului de lucru.
+
+Funcția *main* este punctul principal al programului.
+Aici aloc și transfer date pe dispozitivul meu, caut nonce-ul.
+Am ales să apelez funcția findNonce în acest fel:
+*<<< 1 + MAX_NONCE / 256, 256 >>>*, deoarece MAX_NONCE/256 reprezintă
+numărul de blocuri necesare pentru a acoperi toate nonce-urile posibile,
+împărțind clasic spațiul blocurilor (256 = numărul de fire de execuție
+în fiecare bloc). Valoarea de 1 în plus asigură o suficiență pentru
+acoperirea întreg spațiului. În aceste fel, am procesat nonce-urile
+în mod eficient fără a avea nevoie de o buclă for. Apoi transferăm
+datele de pe GPU pe host, pentru a putea fi utilizate ulterior,
+pentru actualizarea blocului de date și recalcularea hash-ului.
+Apoi am convertit nonce-ul dintr-un număr într-un șir de caractere,
+pentru ca la final să-l concatenez la sfârșitul blocului. 
+Variabila len este calculată pentru a ne asigura că toate datele din
+bloc sunt luate în considerare. Calculăm hash-ul SHA-256 al blocului
+actualizat pentru a valida corectitudinea blocului și a nonce-ului
+asociat.
+
+
